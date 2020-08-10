@@ -83,7 +83,19 @@
             }
         }
 
-        input.addEventListener("input", generate, false);
+        input.addEventListener("input", generate, false)
+
+
+        var URLParameter = location.search.substring(1)
+        if (!URLParameter) {
+            URLParameter = location.hash.substring(1)
+        }
+        if (URLParameter) {
+            input.innerText = URLParameter
+            generate()
+        }
+
+
     </script>
 </body>
 
