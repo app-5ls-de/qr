@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, shrink-to-fit=no"
+        />
+        <title>QR</title>
+        <style>
+            body {
+                margin: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+            }
+
+            .center {
+                display: flex;
+                flex-direction: column;
+                max-height: 100vh;
+                max-width: 100vw;
+                width: 25rem;
+                height: min-content;
+            }
+
+            div#input {
+            }
+
+            div#output.grey {
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="center">
+            <video id="input"></video>
+            <div id="output"></div>
+        </div>
+
+        <script src="/nimiq_qr-scanner@e8a77dea3fd5e1d7f403779bd95ff827b835baff/qr-scanner.umd.min.js"></script>
+        <script>
+            QrScanner.WORKER_PATH =
+                "/nimiq_qr-scanner@e8a77dea3fd5e1d7f403779bd95ff827b835baff/qr-scanner-worker.min.js";
+
+            function convert_url(text) {
+                // from https://www.html-code-generator.com/javascript/url-to-clickable-link
+
+                const link_attributes = {
+                    target: "_blank",
+                    rel: "nofollow noopener",
+                };
+
+                //html to text
+                text = text.replace(/</g, "&lt;");
+                text = text.replace(/>/g, "&gt;");
+
+                let attr = [];
+                for (let k in link_attributes) {
+                    if (k !== "href") {
+                        attr.push(
+                            k +
+                                '="' +
+                                link_attributes[k].replaceAll(/"/g, "'") +
+                                '"'
+                        );
+                    }
+                }
+
+                //URLs starting with http://, https://, or ftp://
+                const exp = /((?:https?|ftp):\/\/[a-zA-Z0-9][\w+\d+&@\-#\/%?=~_|!:,.;+]*)/gim;
+                text = text.replace(
+                    exp,
+                    '<a href="$1" ' + attr.join(" ") + ">$1</a>"
+                );
+
+                //URLs starting with www.
+                const reg_ww = /(?<!\/)(www\.[a-zA-Z0-9][\w+\d+&@\-#\/%?=~_|!:,.;+]*)/gim;
+                text = text.replace(
+                    reg_ww,
+                    '<a href="https://$1" ' + attr.join(" ") + ">$1</a>"
+                );
+
+                return text;
+            }
+
+            var input = document.getElementById("input");
+            var output = document.getElementById("output");
+
+            const scanner = new QrScanner(
+                input,
+                (result) => {
+                    console.log(result);
+                    output.innerHTML = convert_url(result);
+                },
+                (error) => {}
+            );
+            scanner.start().then(() => {
+                console.log("started");
+            });
+        </script>
+    </body>
+</html>
