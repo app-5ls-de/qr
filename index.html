@@ -37,6 +37,11 @@
       div#output.grey {
         opacity: 0.3;
       }
+
+      #download {
+        width: min-content;
+        margin: 0 auto;
+      }
     </style>
   </head>
 
@@ -44,13 +49,14 @@
     <div class="center">
       <div id="input" contenteditable><br /></div>
       <div id="output" class="grey"></div>
+      <button id="download">Download</button>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
     <script>
       var input = document.getElementById("input");
       var output = document.getElementById("output");
-      var isactive = false;
+      var download = document.getElementById("download");
       var isgrey = true;
 
       var default_svg =
@@ -89,6 +95,21 @@
       }
 
       input.addEventListener("input", generate);
+      download.addEventListener("click", async () => {
+        if (!input.innerText || input.innerText == "\n") return;
+
+        try {
+          var dataurl = await QRCode.toDataURL(input.innerText, {
+            errorCorrectionLevel: "M",
+          });
+        } catch (err) {
+          throw err;
+        }
+        let a = document.createElement("a");
+        a.href = dataurl;
+        a.setAttribute("download", "qr.png");
+        a.click();
+      });
 
       var URLParameter = location.search.substring(1);
       if (!URLParameter) {
