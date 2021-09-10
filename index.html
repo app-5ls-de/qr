@@ -60,35 +60,35 @@
         input.focus();
       }, 0);
 
-      function generate() {
-        if (!isactive) {
-          if (input.innerText && input.innerText != "\n") {
-            if (isgrey) {
-              output.classList.remove("grey");
-              output.innerHTML = "";
-              isgrey = false;
-            }
-            isactive = true;
-            QRCode.toString(
-              input.innerText,
-              { errorCorrectionLevel: "M", type: "svg" },
-              function (err, string) {
-                if (err) throw err;
-                output.innerHTML = string;
-                isactive = false;
-              }
-            );
-          } else {
-            if (!isgrey) {
-              output.classList.add("grey");
-              output.innerHTML = default_svg;
-              isgrey = true;
-            }
+      async function generate() {
+        if (!input.innerText || input.innerText == "\n") {
+          if (!isgrey) {
+            output.classList.add("grey");
+            output.innerHTML = default_svg;
+            isgrey = true;
           }
+          return;
         }
+
+        if (isgrey) {
+          output.classList.remove("grey");
+          output.innerHTML = "";
+          isgrey = false;
+        }
+
+        try {
+          var string = await QRCode.toString(input.innerText, {
+            errorCorrectionLevel: "M",
+            type: "svg",
+          });
+        } catch (err) {
+          throw err;
+        }
+
+        output.innerHTML = string;
       }
 
-      input.addEventListener("input", generate, false);
+      input.addEventListener("input", generate);
 
       var URLParameter = location.search.substring(1);
       if (!URLParameter) {
